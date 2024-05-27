@@ -125,6 +125,7 @@ namespace Badgie.Migrator
 
         private static DbConnection CreateConnection(Config config)
         {
+            if (config.Verbose) Console.WriteLine($"Info: create connection to {config.ConnectionString}");
             switch (config.SqlType)
             {
                 case SqlType.MySql:
@@ -207,11 +208,11 @@ CREATE TABLE `migration_runs` (
         {
             var path = config.Path;
             var info = new FileInfo(path);
-            var files = Directory.EnumerateFiles(info.Directory.FullName, info.Name).OrderBy(f => f).ToList();
+            var files = Directory.EnumerateFiles(info.Directory.FullName, info.Name, SearchOption.AllDirectories).OrderBy(f => f).ToList();
 
             if (config.Verbose)
             {
-                Console.WriteLine("Info: migrations found (in order):");
+                Console.WriteLine($"Info: migrations found in {info.Directory.FullName}/{info.Name} (in order):");
                 foreach (var file in files)
                     Console.WriteLine("Info: {0}", file);
             }
@@ -259,7 +260,7 @@ CREATE TABLE `migration_runs` (
                         SqlType.MySql => "select * from `migration_runs` where filename = @migrationFilename",
                         _ => "select * from MigrationRuns where Filename = @migrationFilename"
                     },
-                    new { migrationFilename = Path.GetFileName(migrationFilename) }
+                    new { migrationFilename = $"{Path.GetFileName(Path.GetDirectoryName(migrationFilename))}/{Path.GetFileName(migrationFilename)}" }
                 );
             }
 
@@ -286,7 +287,7 @@ CREATE TABLE `migration_runs` (
                 }, new MigrationRun
                 {
                     LastRun = DateTime.UtcNow,
-                    Filename = Path.GetFileName(migrationFilename),
+                    Filename = $"{Path.GetFileName(Path.GetDirectoryName(migrationFilename))}/{Path.GetFileName(migrationFilename)}",
                     MD5 = crc,
                     MigrationResult = MigrationResult.Changed
                 });
@@ -306,7 +307,7 @@ CREATE TABLE `migration_runs` (
                 }, new MigrationRun
                 {
                     LastRun = DateTime.UtcNow,
-                    Filename = Path.GetFileName(migrationFilename),
+                    Filename = $"{Path.GetFileName(Path.GetDirectoryName(migrationFilename))}/{Path.GetFileName(migrationFilename)}",
                     MD5 = crc,
                     MigrationResult = MigrationResult.Run
                 });

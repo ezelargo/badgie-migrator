@@ -84,7 +84,7 @@ Alternative usage: dotnet-badgie-migrator -json=filename
                 return FromJson(FileLoader(big["-json=".Length..]));
             }
 
-            config.ConnectionString = args.First();
+            config.ConnectionString = args.First().Trim();
 
             if (args.Length <= 1) return config;
 
@@ -134,7 +134,7 @@ Alternative usage: dotnet-badgie-migrator -json=filename
                         break;
 
                     default:
-                        config.Path = str;
+                        config.Path = str.Trim();
                         break;
                 }
             }
